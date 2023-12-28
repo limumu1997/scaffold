@@ -1,0 +1,8 @@
+{
+  "service": {
+    "name": "scaffold",
+    "display_name": "go-scaffold",
+    "description": "go-scaffold"
+  },
+  "listen_port": ":"
+}
