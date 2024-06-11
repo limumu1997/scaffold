@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"log/slog"
 	"os"
-	"path/filepath"
 )
 
 var (
@@ -26,10 +25,8 @@ type config struct {
 }
 
 func InitConfig() {
-	executable, _ := os.Executable()
-	res, _ := filepath.EvalSymlinks(filepath.Dir(executable))
-	absPath := filepath.Join(res, "config.json")
-	dataConfig, err := os.ReadFile(absPath)
+	conf := "config.json"
+	dataConfig, err := os.ReadFile(conf)
 	if err != nil {
 		slog.Info("prod env can not find config.json file, use embed config")
 		dataConfig, _ = c.ReadFile("config.json")
