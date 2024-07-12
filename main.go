@@ -1,7 +1,7 @@
 package main
 
-import "scaffold/cmd"
+import "scaffold/app"
 
 func main() {
-	cmd.InitDaemon()
+	app.StartDaemon()
 }

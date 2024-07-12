@@ -1,9 +1,9 @@
-package cmd
+package app
 
 import (
 	"flag"
 	"os"
-	"scaffold/internal/conf"
+	conf "scaffold/config"
 
 	"github.com/kardianos/service"
 	"github.com/sirupsen/logrus"
@@ -71,7 +71,7 @@ func uninstallService() {
 	os.Exit(1)
 }
 
-func InitDaemon() {
+func StartDaemon() {
 	flag.Parse()
 	switch *serviceType {
 	case "install":

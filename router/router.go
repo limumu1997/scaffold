@@ -1,8 +1,9 @@
-package app
+package router
 
 import (
 	"net/http"
-	"scaffold/internal/conf"
+	conf "scaffold/config"
+	"scaffold/controller"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -11,7 +12,7 @@ import (
 
 func ListenAndServe() {
 	r := mux.NewRouter()
-	r.HandleFunc("/index", IndexHandler).Methods(http.MethodPost)
+	r.HandleFunc("/index", controller.IndexHandler).Methods(http.MethodPost)
 	http.Handle("/", r)
 
 	srv := &http.Server{

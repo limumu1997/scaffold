@@ -1,4 +1,4 @@
-package bootstrap
+package cmd
 
 import (
 	"bytes"
@@ -15,7 +15,7 @@ type MyFormatter struct{}
 
 type MyErrorHook struct{ errorLogger *lumberjack.Logger }
 
-func InitLog() {
+func InitMyLog() {
 	executable, _ := os.Executable()
 	res, _ := filepath.EvalSymlinks(filepath.Dir(executable))
 	appLogger := &lumberjack.Logger{
