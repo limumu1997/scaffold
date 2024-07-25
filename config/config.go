@@ -3,7 +3,6 @@ package config
 import (
 	"embed"
 	"encoding/json"
-	"log/slog"
 	"os"
 )
 
@@ -28,7 +27,6 @@ func InitConfig() {
 	conf := "config.json"
 	dataConfig, err := os.ReadFile(conf)
 	if err != nil {
-		slog.Info("prod env can not find config.json file, use embed config")
 		dataConfig, _ = c.ReadFile("config.json")
 	}
 	json.Unmarshal(dataConfig, &Config)

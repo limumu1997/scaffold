@@ -12,9 +12,8 @@ import (
 
 func ListenAndServe() {
 	r := mux.NewRouter()
-	r.HandleFunc("/index", controller.IndexHandler).Methods(http.MethodPost)
-	http.Handle("/", r)
-
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {})
+	r.HandleFunc("/index", controller.IndexHandler).Methods(http.MethodGet)
 	srv := &http.Server{
 		Handler: r,
 		Addr:    conf.Config.ListenPort,
@@ -22,5 +21,6 @@ func ListenAndServe() {
 		WriteTimeout: 3 * time.Second,
 		ReadTimeout:  3 * time.Second,
 	}
+	logrus.Infof("listen http://127.0.0.1%s", srv.Addr)
 	logrus.Fatal(srv.ListenAndServe())
 }

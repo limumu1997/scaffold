@@ -47,11 +47,15 @@ func InitMyLog() {
 // Implement Formatter interface
 // Format renders a single logrus entry
 func (m *MyFormatter) Format(entry *logrus.Entry) ([]byte, error) {
-	formatEntry := formatEntry(entry)
+	prefix, ok := entry.Data["prefix"].(string)
+	if !ok {
+		prefix = ""
+	}
+	formatEntry := formatEntry(entry, prefix)
 	return formatEntry, nil
 }
 
-func formatEntry(entry *logrus.Entry) []byte {
+func formatEntry(entry *logrus.Entry, prefix string) []byte {
 	var b *bytes.Buffer
 	if entry.Buffer != nil {
 		b = entry.Buffer
@@ -68,6 +72,11 @@ func formatEntry(entry *logrus.Entry) []byte {
 	sb.WriteString(entry.Level.String())
 	sb.WriteString("]")
 	sb.WriteString(" ")
+	if prefix != "" {
+		sb.WriteString("[")
+		sb.WriteString(prefix)
+		sb.WriteString("] ")
+	}
 	sb.WriteString(entry.Message)
 	sb.WriteString("\r\n")
 	fileVal := sb.String()
@@ -86,7 +95,11 @@ func (h *MyErrorHook) Levels() []logrus.Level {
 }
 
 func (h *MyErrorHook) Fire(entry *logrus.Entry) error {
-	formatEntry := formatEntry(entry)
+	prefix, ok := entry.Data["prefix"].(string)
+	if !ok {
+		prefix = ""
+	}
+	formatEntry := formatEntry(entry, prefix)
 	if _, err := h.errorLogger.Write(formatEntry); err != nil {
 		return err
 	}
