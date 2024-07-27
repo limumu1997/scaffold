@@ -4,6 +4,15 @@
 2. 终端启动打开默认浏览器；
 3. 使用 logrus 格式化日志，lumberjack.v2 切割日志
 
+#### 1.0.19
+fix:
+1. windows 服务模式默认路径由 system32 该到当前程序路径下
+
+feat:
+1. 增加 http 日志中间件、跨域处理中间件
+2. 增加日志 prefix `logrus.WithField("prefix", "any logs")` 调用
+
+
 #### 1.0.18
 feat:
 1. 简化项目结构

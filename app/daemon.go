@@ -3,6 +3,7 @@ package app
 import (
 	"flag"
 	"os"
+	"path/filepath"
 	conf "scaffold/config"
 
 	"github.com/kardianos/service"
@@ -82,6 +83,7 @@ func StartDaemon() {
 		s := getService()
 		status, _ := s.Status()
 		if status != service.StatusUnknown {
+			setCurrentDirToExecutableDir()
 			// service runs
 			s.Run()
 		} else {
@@ -96,4 +98,24 @@ func StartDaemon() {
 			s.Run()
 		}
 	}
+}
+
+// setCurrentDirToExecutableDir 设置当前工作目录为可执行文件所在的目录
+func setCurrentDirToExecutableDir() error {
+	// 获取可执行文件的路径
+	exePath, err := os.Executable()
+	if err != nil {
+		return err
+	}
+
+	// 获取可执行文件的目录
+	exeDir := filepath.Dir(exePath)
+
+	// 将当前工作目录设置为可执行文件的目录
+	err = os.Chdir(exeDir)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
