@@ -2,14 +2,18 @@ package router
 
 import (
 	"net/http"
-	conf "scaffold/config"
-	"scaffold/controller"
-	"scaffold/middleware"
+	"scaffold/app/index/api"
+	"scaffold/common/config"
+	"scaffold/common/middleware"
 	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 )
+
+func setupRoutes(r *mux.Router) {
+	r.HandleFunc("/index", api.IndexHandler).Methods(http.MethodGet)
+}
 
 func ListenAndServe() {
 	r := mux.NewRouter()
@@ -24,15 +28,11 @@ func ListenAndServe() {
 	setupRoutes(r)
 	srv := &http.Server{
 		Handler: r,
-		Addr:    conf.Config.ListenPort,
+		Addr:    config.Config.ListenPort,
 		// Good practice: enforce timeouts for servers you create!
 		WriteTimeout: 3 * time.Second,
 		ReadTimeout:  3 * time.Second,
 	}
 	logrus.Infof("listen http://127.0.0.1%s", srv.Addr)
 	logrus.Fatal(srv.ListenAndServe())
-}
-
-func setupRoutes(r *mux.Router) {
-	r.HandleFunc("/index", controller.IndexHandler).Methods(http.MethodGet)
 }

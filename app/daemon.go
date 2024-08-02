@@ -4,7 +4,7 @@ import (
 	"flag"
 	"os"
 	"path/filepath"
-	conf "scaffold/config"
+	"scaffold/common/config"
 
 	"github.com/kardianos/service"
 	"github.com/sirupsen/logrus"
@@ -29,9 +29,9 @@ func (p *program) Stop(s service.Service) error {
 func getService() service.Service {
 	options := make(service.KeyValue)
 	svcConfig := &service.Config{
-		Name:        conf.Config.Service.Name,
-		DisplayName: conf.Config.Service.DisplayName,
-		Description: conf.Config.Service.Description,
+		Name:        config.Config.Service.Name,
+		DisplayName: config.Config.Service.DisplayName,
+		Description: config.Config.Service.Description,
 		Option:      options,
 	}
 
@@ -50,14 +50,14 @@ func installService() {
 		// 服务未知，创建服务
 		if err = s.Install(); err == nil {
 			s.Start()
-			logrus.Printf("install %s install successful!", conf.Config.Service.Name)
+			logrus.Printf("install %s install successful!", config.Config.Service.Name)
 			return
 		}
-		logrus.Printf("install %s service failure, ERR: %s\n", err, conf.Config.Service.Name)
+		logrus.Printf("install %s service failure, ERR: %s\n", err, config.Config.Service.Name)
 	}
 
 	if status != service.StatusUnknown {
-		logrus.Printf("%s service installed, no reinstallation required", conf.Config.Service.Name)
+		logrus.Printf("%s service installed, no reinstallation required", config.Config.Service.Name)
 	}
 }
 
@@ -65,9 +65,9 @@ func uninstallService() {
 	s := getService()
 	s.Stop()
 	if err := s.Uninstall(); err == nil {
-		logrus.Printf("%s service uninstall successful!", conf.Config.Service.Name)
+		logrus.Printf("%s service uninstall successful!", config.Config.Service.Name)
 	} else {
-		logrus.Printf("%s service uninstall failure, ERR: %s\n", err, conf.Config.Service.Name)
+		logrus.Printf("%s service uninstall failure, ERR: %s\n", err, config.Config.Service.Name)
 	}
 	os.Exit(1)
 }
@@ -90,9 +90,9 @@ func StartDaemon() {
 			logrus.Println("non-service runs")
 			switch s.Platform() {
 			case "windows-service":
-				logrus.Printf("service runs: .\\%s.exe -s install", conf.Config.Service.Name)
+				logrus.Printf("service runs: .\\%s.exe -s install", config.Config.Service.Name)
 			default:
-				logrus.Printf("service runs: sudo ./%s -s install", conf.Config.Service.Name)
+				logrus.Printf("service runs: sudo ./%s -s install", config.Config.Service.Name)
 			}
 			// run anything
 			s.Run()

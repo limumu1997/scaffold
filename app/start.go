@@ -1,8 +1,8 @@
 package app
 
 import (
+	"scaffold/app/router"
 	"scaffold/cmd"
-	"scaffold/router"
 )
 
 func init() {

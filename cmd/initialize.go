@@ -1,11 +1,11 @@
 package cmd
 
-import conf "scaffold/config"
+import "scaffold/common/config"
 
 func InitLog() {
 	InitMyLog()
 }
 
 func InitConfig() {
-	conf.InitConfig()
+	config.InitConfig()
 }
