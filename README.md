@@ -37,9 +37,8 @@ feat:
 1. 同步版本
 
 ``` shell
-go build -ldflags=-w -o .\bin\scaffold.exe .\main.go
-
-upx --best .\bin\scaffold.exe -o .\bin\scaffold-service.exe
+go build -ldflags=-w -o .\cmd\bin\scaffold.exe .\cmd\main.go
+upx --best .\cmd\bin\scaffold.exe -o .\cmd\bin\scaffold-service.exe
 ```
 
 ## Commit 指南

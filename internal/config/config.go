@@ -27,7 +27,7 @@ func InitConfig() {
 	conf := "config.json"
 	dataConfig, err := os.ReadFile(conf)
 	if err != nil {
-		dataConfig, _ = c.ReadFile("config.json")
+		dataConfig, _ = c.ReadFile(conf)
 	}
 	json.Unmarshal(dataConfig, &Config)
 }

@@ -4,7 +4,7 @@ import (
 	"flag"
 	"os"
 	"path/filepath"
-	"scaffold/common/config"
+	"scaffold/internal/config"
 
 	"github.com/kardianos/service"
 	"github.com/sirupsen/logrus"

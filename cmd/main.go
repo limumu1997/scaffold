@@ -1,6 +1,6 @@
 package main
 
-import "scaffold/app"
+import "scaffold/internal/app"
 
 func main() {
 	app.StartDaemon()
