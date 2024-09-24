@@ -3,7 +3,9 @@ package config
 import (
 	"embed"
 	"encoding/json"
+	"log/slog"
 	"os"
+	"path/filepath"
 )
 
 var (
@@ -24,10 +26,14 @@ type config struct {
 }
 
 func InitConfig() {
-	conf := "config.json"
-	dataConfig, err := os.ReadFile(conf)
+	cnf := "config.json"
+	executable, _ := os.Executable()
+	res, _ := filepath.EvalSymlinks(filepath.Dir(executable))
+	absPath := filepath.Join(res, cnf)
+	dataConfig, err := os.ReadFile(absPath)
 	if err != nil {
-		dataConfig, _ = c.ReadFile(conf)
+		slog.Info("prod env can not find config.json file, use embed config")
+		dataConfig, _ = c.ReadFile(cnf)
 	}
 	json.Unmarshal(dataConfig, &Config)
 }
