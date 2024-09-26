@@ -17,7 +17,7 @@ type program struct{}
 
 func (p *program) Start(s service.Service) error {
 	// Start should not block. Do the actual work async.
-	go start()
+	go run()
 	return nil
 }
 
@@ -72,7 +72,7 @@ func uninstallService() {
 	os.Exit(1)
 }
 
-func StartDaemon() {
+func startDaemon() {
 	flag.Parse()
 	switch *serviceType {
 	case "install":
