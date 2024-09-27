@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	maxBodySize = 1024 * 10 // 10 KB
+	maxLogSize = 256 // byte
 )
 
 func LoggingMiddleware(next http.Handler) http.Handler {
@@ -27,24 +27,21 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 		}
 		start := time.Now()
 
-		// 读取请求体，但限制大小
-		var bodyBytes []byte
+		var bodyBuffer bytes.Buffer
+		var bodyReader io.Reader = r.Body
+
+		// 如果有请求体，设置 TeeReader
 		if r.Body != nil {
-			limitedReader := io.LimitReader(r.Body, int64(maxBodySize)+1)
-			bodyBytes, _ = io.ReadAll(limitedReader)
-
-			// 检查是否超过大小限制
-			if len(bodyBytes) > maxBodySize {
-				bodyBytes = bodyBytes[:maxBodySize]
-				bodyBytes = append(bodyBytes, []byte("... (truncated)")...)
-			}
-
-			// 重新设置请求体，因为读取后会消耗掉
-			r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+			bodyReader = io.TeeReader(r.Body, &bodyBuffer)
 		}
 
+		// 创建一个新的 request，复制原始请求的所有字段
+		newRequest := *r
+		// 设置新的 Body
+		newRequest.Body = io.NopCloser(bodyReader)
+
 		wrappedWriter := &responseWriter{ResponseWriter: w, status: 200}
-		next.ServeHTTP(wrappedWriter, r)
+		next.ServeHTTP(wrappedWriter, &newRequest)
 
 		duration := time.Since(start)
 
@@ -53,7 +50,7 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 
 		// 创建一个包含所有字段的消息字符串
 		logMessage := fmt.Sprintf(
-			"%s %s - Status: %d, Duration: %v, Remote Addr: %s",
+			"%s %s - status: %d, duration: %v, remote addr: %s",
 			r.Method,
 			r.URL.Path,
 			wrappedWriter.status,
@@ -61,9 +58,14 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 			clientIP,
 		)
 
-		// 添加请求体到日志消息中
-		if len(bodyBytes) > 0 {
-			logMessage += fmt.Sprintf(", Body: %s", string(bodyBytes))
+		// 添加请求体到日志消息中，但限制日志大小
+		if bodyBuffer.Len() > 0 {
+			logBody := bodyBuffer.Bytes()
+			if len(logBody) > maxLogSize {
+				logBody = logBody[:maxLogSize]
+				logBody = append(logBody, []byte("... (truncated)")...)
+			}
+			logMessage += fmt.Sprintf(", body: %s", string(logBody))
 		}
 
 		// 使用 WithField 来添加一个前缀，这样可以与您的自定义格式器配合使用
