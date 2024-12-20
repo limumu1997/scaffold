@@ -25,6 +25,18 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 			return
 		}
+
+		// 获取客户端 IP
+		clientIP := getClientIP(r)
+
+		// 请求开始时打印日志
+		logrus.WithField("prefix", "HTTP").Infof(
+			"Request Started - %s %s from %s",
+			r.Method,
+			r.URL.Path,
+			clientIP,
+		)
+
 		start := time.Now()
 
 		var bodyBuffer bytes.Buffer
@@ -45,12 +57,9 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 
 		duration := time.Since(start)
 
-		// 获取真实的客户端 IP 地址
-		clientIP := getClientIP(r)
-
-		// 创建一个包含所有字段的消息字符串
+		// 请求结束时的日志消息
 		logMessage := fmt.Sprintf(
-			"%s %s - status: %d, duration: %v, remote addr: %s",
+			"Request Completed - %s %s - status: %d, duration: %v, remote addr: %s",
 			r.Method,
 			r.URL.Path,
 			wrappedWriter.status,
@@ -68,7 +77,7 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 			logMessage += fmt.Sprintf(", body: %s", string(logBody))
 		}
 
-		// 使用 WithField 来添加一个前缀，这样可以与您的自定义格式器配合使用
+		// 请求结束时打印日志
 		logrus.WithField("prefix", "HTTP").Info(logMessage)
 	})
 }
