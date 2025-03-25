@@ -1,11 +1,11 @@
 package app
 
 import (
+	"fmt"
+	"log/slog"
 	"scaffold/internal/config"
 	"scaffold/internal/router"
 	"scaffold/pkg/common/util"
-
-	"github.com/sirupsen/logrus"
 )
 
 func init() {
@@ -14,7 +14,7 @@ func init() {
 }
 
 func Start() {
-	logrus.Infof("start %s version %s", config.Config.Service.Name, Version)
+	slog.Info(fmt.Sprintf("Start %s version %s", config.Config.Service.Name, Version))
 	if util.IsRunInDocker() {
 		run()
 	} else {

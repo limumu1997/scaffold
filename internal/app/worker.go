@@ -2,12 +2,13 @@ package app
 
 import (
 	"flag"
+	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"scaffold/internal/config"
 
 	"github.com/kardianos/service"
-	"github.com/sirupsen/logrus"
 )
 
 // service manager
@@ -38,7 +39,7 @@ func getService() service.Service {
 	prg := &program{}
 	s, err := service.New(prg, svcConfig)
 	if err != nil {
-		logrus.Fatalln(err)
+		slog.Error(err.Error())
 	}
 	return s
 }
@@ -50,14 +51,14 @@ func installService() {
 		// 服务未知，创建服务
 		if err = s.Install(); err == nil {
 			s.Start()
-			logrus.Printf("install %s install successful!", config.Config.Service.Name)
+			slog.Info("install service successful!")
 			return
 		}
-		logrus.Printf("install %s service failure, ERR: %s\n", err, config.Config.Service.Name)
+		slog.Error("install service failure")
 	}
 
 	if status != service.StatusUnknown {
-		logrus.Printf("%s service installed, no reinstallation required", config.Config.Service.Name)
+		slog.Info("service installed, no reinstallation required")
 	}
 }
 
@@ -65,9 +66,9 @@ func uninstallService() {
 	s := getService()
 	s.Stop()
 	if err := s.Uninstall(); err == nil {
-		logrus.Printf("%s service uninstall successful!", config.Config.Service.Name)
+		slog.Info("service uninstall successful!")
 	} else {
-		logrus.Printf("%s service uninstall failure, ERR: %s\n", err, config.Config.Service.Name)
+		slog.Error("service uninstall failure!")
 	}
 	os.Exit(1)
 }
@@ -87,12 +88,12 @@ func startDaemon() {
 			// service runs
 			s.Run()
 		} else {
-			logrus.Println("non-service runs")
+			slog.Info("non-service runs")
 			switch s.Platform() {
 			case "windows-service":
-				logrus.Printf("service runs: .\\%s.exe -s install", config.Config.Service.Name)
+				slog.Info(fmt.Sprintf("service runs: .\\%s.exe -s install", config.Config.Service.Name))
 			default:
-				logrus.Printf("service runs: sudo ./%s -s install", config.Config.Service.Name)
+				slog.Info(fmt.Sprintf("service runs: sudo ./%s -s install", config.Config.Service.Name))
 			}
 			// run anything
 			s.Run()

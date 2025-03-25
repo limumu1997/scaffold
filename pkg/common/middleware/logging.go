@@ -8,8 +8,6 @@ import (
 	"net/http"
 	"strings"
 	"time"
-
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -30,12 +28,12 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 		clientIP := getClientIP(r)
 
 		// 请求开始时打印日志
-		logrus.WithField("prefix", "HTTP").Infof(
-			"Request Started - %s %s from %s",
-			r.Method,
-			r.URL.Path,
-			clientIP,
-		)
+		// logger.WithPrefix("HTTP").Info(
+		// 	"Request Started - %s %s from %s",
+		// 	r.Method,
+		// 	r.URL.Path,
+		// 	clientIP,
+		// )
 
 		start := time.Now()
 
@@ -78,7 +76,7 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 		}
 
 		// 请求结束时打印日志
-		logrus.WithField("prefix", "HTTP").Info(logMessage)
+		// logger.WithPrefix("HTTP").Info(logMessage)
 	})
 }
 

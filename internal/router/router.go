@@ -1,14 +1,15 @@
 package router
 
 import (
+	"fmt"
+	"log/slog"
 	"net/http"
+	"os"
 	"scaffold/internal/config"
 	"scaffold/internal/index/api"
 	"scaffold/pkg/common/middleware"
 
 	"time"
-
-	"github.com/sirupsen/logrus"
 )
 
 func setupRoutes(r *http.ServeMux) {
@@ -31,6 +32,9 @@ func ListenAndServe() {
 		WriteTimeout: 3 * time.Second,
 		ReadTimeout:  3 * time.Second,
 	}
-	logrus.Infof("listen http://127.0.0.1%s", srv.Addr)
-	logrus.Fatal(srv.ListenAndServe())
+	slog.Info(fmt.Sprintf("Server is listening on http://127.0.0.1%s", srv.Addr))
+	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		slog.Error("Server failed", "error", err)
+		os.Exit(1)
+	}
 }

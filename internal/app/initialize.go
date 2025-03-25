@@ -6,6 +6,7 @@ import (
 )
 
 func InitLog() {
+	// 初始化日志
 	logger.InitMyLog()
 }
 
