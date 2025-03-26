@@ -6,6 +6,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"scaffold/pkg/logger"
 	"strings"
 	"time"
 )
@@ -28,12 +29,8 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 		clientIP := getClientIP(r)
 
 		// 请求开始时打印日志
-		// logger.WithPrefix("HTTP").Info(
-		// 	"Request Started - %s %s from %s",
-		// 	r.Method,
-		// 	r.URL.Path,
-		// 	clientIP,
-		// )
+		logger.WithPrefix("HTTP").Info(fmt.Sprintf("Request Started - %s %s from %s",
+			r.Method, r.URL.Path, clientIP))
 
 		start := time.Now()
 
@@ -76,7 +73,7 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 		}
 
 		// 请求结束时打印日志
-		// logger.WithPrefix("HTTP").Info(logMessage)
+		logger.WithPrefix("HTTP").Info(logMessage)
 	})
 }
 

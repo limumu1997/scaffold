@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -162,27 +163,94 @@ func (w *RotateFileWriter) cleanOldLogs() {
 	}
 
 	// 删除多余的备份
-	for i := range len(backups) - w.maxBackups {
+	for i := range len(backups)-w.maxBackups {
 		os.Remove(backups[i].name)
 	}
 }
 
 // 自定义格式化处理器
-func newTextHandler(w io.Writer) slog.Handler {
-	return slog.NewTextHandler(w, &slog.HandlerOptions{
-		AddSource: false,
-		Level:     slog.LevelDebug,
-		// ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
-		// 	// 自定义时间格式
-		// 	if a.Key == "time" {
-		// 		return slog.Attr{
-		// 			Key:   a.Key,
-		// 			Value: slog.StringValue(a.Value.Time().Format("2006-01-02T15:04:05.000")),
-		// 		}
-		// 	}
-		// 	return a
-		// },
+type customHandler struct {
+	w          io.Writer
+	level      slog.Level
+	withSource bool
+}
+
+func (h *customHandler) Enabled(_ context.Context, level slog.Level) bool {
+	return level >= h.level
+}
+
+func (h *customHandler) Handle(_ context.Context, r slog.Record) error {
+	timestamp := r.Time.Format("2006-01-02T15:04:05.000")
+	levelStr := r.Level.String()
+
+	var prefix string
+	// 尝试获取前缀
+	r.Attrs(func(a slog.Attr) bool {
+		if a.Key == "prefix" {
+			prefix = a.Value.String()
+		}
+		return true
 	})
+
+	var builder strings.Builder
+	builder.WriteString("[")
+	builder.WriteString(timestamp)
+	builder.WriteString("] [")
+	builder.WriteString(strings.ToUpper(levelStr))
+	builder.WriteString("]")
+
+	if prefix != "" {
+		builder.WriteString(" [")
+		builder.WriteString(prefix)
+		builder.WriteString("]")
+	}
+
+	builder.WriteString(" ")
+	builder.WriteString(r.Message)
+
+	// 添加其他属性（排除已处理的前缀）
+	r.Attrs(func(a slog.Attr) bool {
+		if a.Key != "prefix" {
+			builder.WriteString(" ")
+			builder.WriteString(a.Key)
+			builder.WriteString("=")
+
+			// 如果值包含空格，加上引号
+			val := a.Value.String()
+			if strings.ContainsAny(val, " \t\n") {
+				builder.WriteString("\"")
+				builder.WriteString(val)
+				builder.WriteString("\"")
+			} else {
+				builder.WriteString(val)
+			}
+		}
+		return true
+	})
+
+	builder.WriteString("\r\n")
+
+	_, err := h.w.Write([]byte(builder.String()))
+	return err
+}
+
+func (h *customHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	// 创建一个新的处理器，属性会在日志记录时处理
+	return h
+}
+
+func (h *customHandler) WithGroup(name string) slog.Handler {
+	// 简单实现，忽略分组
+	return h
+}
+
+// 创建自定义处理器
+func newTextHandler(w io.Writer) slog.Handler {
+	return &customHandler{
+		w:          w,
+		level:      slog.LevelDebug,
+		withSource: false,
+	}
 }
 
 // Handle 实现 slog.Handler 接口

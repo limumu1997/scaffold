@@ -88,14 +88,13 @@ func startDaemon() {
 			// service runs
 			s.Run()
 		} else {
-			slog.Info("non-service runs")
+			slog.Info("Non-service runs")
 			switch s.Platform() {
 			case "windows-service":
-				slog.Info(fmt.Sprintf("service runs: .\\%s.exe -s install", config.Config.Service.Name))
+				slog.Info(fmt.Sprintf("Service runs: .\\%s.exe -s install", config.Config.Service.Name))
 			default:
-				slog.Info(fmt.Sprintf("service runs: sudo ./%s -s install", config.Config.Service.Name))
+				slog.Info(fmt.Sprintf("Service runs: sudo ./%s -s install", config.Config.Service.Name))
 			}
-			// run anything
 			s.Run()
 		}
 	}
