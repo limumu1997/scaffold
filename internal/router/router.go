@@ -17,6 +17,10 @@ func setupRoutes(r *http.ServeMux) {
 }
 
 func ListenAndServe() {
+	if config.Config.ListenPort == "" {
+		return
+	}
+
 	r := http.NewServeMux()
 
 	// 设置路由
