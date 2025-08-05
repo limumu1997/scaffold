@@ -17,7 +17,7 @@ func setupRoutes(r *http.ServeMux) {
 }
 
 func ListenAndServe() {
-	if config.Config.ListenPort == "" {
+	if config.GetConfig().ListenPort == "" {
 		return
 	}
 
@@ -31,7 +31,7 @@ func ListenAndServe() {
 
 	srv := &http.Server{
 		Handler: mux,
-		Addr:    config.Config.ListenPort,
+		Addr:    config.GetConfig().ListenPort,
 		// Good practice: enforce timeouts for servers you create!
 		WriteTimeout: 3 * time.Second,
 		ReadTimeout:  3 * time.Second,

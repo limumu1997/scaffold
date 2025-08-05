@@ -30,9 +30,9 @@ func (p *program) Stop(s service.Service) error {
 func getService() service.Service {
 	options := make(service.KeyValue)
 	svcConfig := &service.Config{
-		Name:        config.Config.Service.Name,
-		DisplayName: config.Config.Service.DisplayName,
-		Description: config.Config.Service.Description,
+		Name:        config.GetConfig().Service.Name,
+		DisplayName: config.GetConfig().Service.DisplayName,
+		Description: config.GetConfig().Service.Description,
 		Option:      options,
 	}
 
@@ -91,9 +91,9 @@ func startDaemon() {
 			slog.Info("Non-service runs")
 			switch s.Platform() {
 			case "windows-service":
-				slog.Info(fmt.Sprintf("Service runs: .\\%s.exe -s install", config.Config.Service.Name))
+				slog.Info(fmt.Sprintf("Service runs: .\\%s.exe -s install", config.GetConfig().Service.Name))
 			default:
-				slog.Info(fmt.Sprintf("Service runs: sudo ./%s -s install", config.Config.Service.Name))
+				slog.Info(fmt.Sprintf("Service runs: sudo ./%s -s install", config.GetConfig().Service.Name))
 			}
 			s.Run()
 		}
