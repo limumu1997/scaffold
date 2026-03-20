@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"bufio"
 	"bytes"
 	"io"
 	"net"
@@ -102,6 +103,13 @@ func (rw *responseWriter) Write(b []byte) (int, error) {
 		rw.body.Write(b)
 	}
 	return rw.ResponseWriter.Write(b)
+}
+
+func (rw *responseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	if hj, ok := rw.ResponseWriter.(http.Hijacker); ok {
+		return hj.Hijack()
+	}
+	return nil, nil, http.ErrNotSupported
 }
 
 // getClientIP 尝试获取客户端的真实 IP 地址
