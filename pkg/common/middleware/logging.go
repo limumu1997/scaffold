@@ -3,10 +3,11 @@ package middleware
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
+	"log/slog"
 	"net"
 	"net/http"
-	"scaffold/pkg/logger"
 	"strings"
 	"time"
 )
@@ -29,10 +30,7 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 		clientIP := getClientIP(r)
 
 		// 请求开始时打印日志
-		logger.WithPrefix("HTTP").Info("request started",
-			"method", r.Method,
-			"path", r.URL.Path,
-			"remote_ip", clientIP)
+		slog.With("prefix", "HTTP").Info(fmt.Sprintf("Request Started - %s %s from %s", r.Method, r.URL.Path, clientIP))
 
 		start := time.Now()
 
@@ -54,55 +52,39 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 
 		duration := time.Since(start)
 
-		// 默认日志参数
-		logArgs := []any{
-			"method", r.Method,
-			"path", r.URL.Path,
-			"status", wrappedWriter.status,
-			"duration", duration,
-			"remote_ip", clientIP,
-		}
+		// 请求结束时的日志消息
+		logMessage := fmt.Sprintf(
+			"Request Completed - %s %s - status: %d, duration: %v, remote addr: %s",
+			r.Method,
+			r.URL.Path,
+			wrappedWriter.status,
+			duration,
+			clientIP,
+		)
 
-		// 如果请求体不为空，记录请求体
+		// 添加请求体到日志消息中，但限制日志大小
 		if bodyBuffer.Len() > 0 {
-			reqBody := bodyBuffer.String()
-			if len(reqBody) > maxLogSize {
-				reqBody = reqBody[:maxLogSize] + "... (truncated)"
+			logBody := bodyBuffer.Bytes()
+			if len(logBody) > maxLogSize {
+				logBody = logBody[:maxLogSize]
+				logBody = append(logBody, []byte("... (truncated)")...)
 			}
-			logArgs = append(logArgs, "req_body", reqBody)
-		}
-
-		// 如果状态码大于等于 400，记录响应体（错误信息）
-		if wrappedWriter.status >= http.StatusBadRequest && wrappedWriter.body.Len() > 0 {
-			respBody := wrappedWriter.body.String()
-			if len(respBody) > maxLogSize {
-				respBody = respBody[:maxLogSize] + "... (truncated)"
-			}
-			logArgs = append(logArgs, "resp_body", respBody)
+			logMessage += fmt.Sprintf(", body: %s", string(logBody))
 		}
 
 		// 请求结束时打印日志
-		logger.WithPrefix("HTTP").Info("request completed", logArgs...)
+		slog.With("prefix", "HTTP").Info(logMessage)
 	})
 }
 
 type responseWriter struct {
 	http.ResponseWriter
 	status int
-	body   bytes.Buffer
 }
 
 func (rw *responseWriter) WriteHeader(code int) {
 	rw.status = code
 	rw.ResponseWriter.WriteHeader(code)
-}
-
-func (rw *responseWriter) Write(b []byte) (int, error) {
-	// 如果状态码是错误码（>= 400），我们将内容写入 buffer 以便后续打印
-	if rw.status >= http.StatusBadRequest {
-		rw.body.Write(b)
-	}
-	return rw.ResponseWriter.Write(b)
 }
 
 func (rw *responseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
